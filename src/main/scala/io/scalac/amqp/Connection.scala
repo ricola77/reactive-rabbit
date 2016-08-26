@@ -4,7 +4,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import io.scalac.amqp.impl.RabbitConnection
 import org.reactivestreams.{Publisher, Subscriber}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 
@@ -17,6 +17,9 @@ object Connection {
 
   def apply(settings: ConnectionSettings): Connection =
     new RabbitConnection(settings)
+
+  def apply(settings: ConnectionSettings, executionContext: ExecutionContext): Connection =
+    new RabbitConnection(settings, executionContext)
 }
 
 

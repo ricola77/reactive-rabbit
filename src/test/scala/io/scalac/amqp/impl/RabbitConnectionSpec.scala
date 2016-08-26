@@ -2,16 +2,19 @@ package io.scalac.amqp.impl
 
 import java.io.IOException
 import java.util.UUID
+import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 import com.rabbitmq.client.AlreadyClosedException
+import com.typesafe.config.{Config, ConfigFactory}
 import io.scalac.amqp._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
@@ -19,8 +22,12 @@ class RabbitConnectionSpec extends FlatSpec with Matchers with ScalaFutures with
   implicit override val patienceConfig =
     PatienceConfig(timeout = Span(500, Millis), interval = Span(50, Millis))
 
-  val connection = Connection()
-  implicit val system = ActorSystem()
+  val config: Config = ConfigFactory.load()
+  val settings = ConnectionSettings(config)
+  val executionContext = ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
+  val connection = Connection(settings, executionContext)
+
+    implicit val system = ActorSystem()
   implicit val mat = ActorMaterializer()
 
   override def afterAll() = try system.terminate() finally connection.shutdown()
