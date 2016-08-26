@@ -5,6 +5,7 @@ import io.scalac.amqp.impl.RabbitConnection
 import org.reactivestreams.{Publisher, Subscriber}
 
 import scala.concurrent.Future
+import scala.util.Try
 
 
 object Connection {
@@ -128,6 +129,10 @@ trait Connection {
     * @param queue the routing key for each message
     */
   def publishDirectly(queue: String): Subscriber[Message]
+
+  /** Tests if the connection if it is still alive.
+  **/
+  def isHealthy(): Future[Try[Unit]]
 
   /** Shutdowns underlying connection.
     * Publishers and subscribers are terminated and notified via `onError`.

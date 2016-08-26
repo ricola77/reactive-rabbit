@@ -105,6 +105,15 @@ class RabbitConnectionSpec extends FlatSpec with Matchers with ScalaFutures with
     } yield (deleteOk)).futureValue shouldBe Exchange.DeleteOk()
   }
 
+  "isHealthy" should "success if connection is alive" in {
+    connection.isHealthy().futureValue.isSuccess shouldBe true
+  }
+
+  "isHealthy" should "fail if connection is closed" in {
+    connection.shutdown()
+    connection.isHealthy().futureValue.isFailure shouldBe true
+  }
+
   "shutdown" should "close underlying connection" in {
     val connection = Connection().asInstanceOf[RabbitConnection]
     connection.underlying.isOpen() shouldBe true

@@ -9,6 +9,7 @@ import org.reactivestreams.{Subscriber, Subscription}
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, blocking}
+import scala.util.Try
 
 private[amqp] class RabbitConnection(settings: ConnectionSettings) extends Connection {
   val factory = Conversions.toConnectionFactory(settings)
@@ -149,4 +150,8 @@ private[amqp] class RabbitConnection(settings: ConnectionSettings) extends Conne
   override def shutdown() = future(underlying.close())
 
   override def toString = s"RabbitConnection(settings=$settings)"
+
+  override def isHealthy(): Future[Try[Unit]] = future(
+    Try(onChannel(channel => require(channel != null, "channel can't be null")))
+  )
 }
